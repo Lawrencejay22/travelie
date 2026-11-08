@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Logo } from '../components/Logo';
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Logo } from "../components/Logo";
 import {
   ArrowIcon,
   CompassIcon,
@@ -8,39 +8,58 @@ import {
   LogOutIcon,
   MapIcon,
   UsersIcon,
-} from '../components/Icons';
-import { api, getSession, setSession } from '../lib/api';
-import { initials } from '../lib/format';
+} from "../components/Icons";
+import { api, getSession, setSession } from "../lib/api";
+import { initials } from "../lib/format";
 
 const navigation = [
-  { to: '/dashboard', label: 'Overview', icon: <GridIcon size={18} />, end: true },
-  { to: '/dashboard/destinations', label: 'Destinations', icon: <MapIcon size={18} /> },
-  { to: '/dashboard/users', label: 'Travelers', icon: <UsersIcon size={18} /> },
+  {
+    to: "/dashboard",
+    label: "Overview",
+    icon: <GridIcon size={18} />,
+    end: true,
+  },
+  {
+    to: "/dashboard/destinations",
+    label: "Destinations",
+    icon: <MapIcon size={18} />,
+  },
+  { to: "/dashboard/users", label: "Travelers", icon: <UsersIcon size={18} /> },
+  { to: "/dashboard/reviews", label: "Reviews", icon: <HeartIcon size={18} /> },
 ];
 
 const titles: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Overview', subtitle: 'A calm read on where Travelie stands today.' },
-  '/dashboard/destinations': {
-    title: 'Destinations',
-    subtitle: 'The curated catalog powering the mobile app.',
+  "/dashboard": {
+    title: "Overview",
+    subtitle: "A calm read on where Travelie stands today.",
   },
-  '/dashboard/users': { title: 'Travelers', subtitle: 'Accounts exploring Travelie.' },
+  "/dashboard/destinations": {
+    title: "Destinations",
+    subtitle: "The curated catalog powering the mobile app.",
+  },
+  "/dashboard/users": {
+    title: "Travelers",
+    subtitle: "Accounts exploring Travelie.",
+  },
+  "/dashboard/reviews": {
+    title: "Review moderation",
+    subtitle: "Review traveler feedback before it appears publicly.",
+  },
 };
 
 export function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const session = getSession();
-  const meta = titles[location.pathname] ?? titles['/dashboard'];
+  const meta = titles[location.pathname] ?? titles["/dashboard"];
 
   const signOut = async () => {
     try {
       if (session?.refreshToken) await api.logout(session.refreshToken);
     } catch {
-      // Local session still needs to clear if the request fails.
     } finally {
       setSession(null);
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }
   };
 
@@ -59,19 +78,18 @@ export function DashboardLayout() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) => `sidebar__link ${isActive ? 'is-active' : ''}`}
+              className={({ isActive }) =>
+                `sidebar__link ${isActive ? "is-active" : ""}`
+              }
             >
               {item.icon}
               <span>{item.label}</span>
             </NavLink>
           ))}
 
-          <span className="sidebar__label sidebar__label--spaced">Coming soon</span>
-          <div className="sidebar__link sidebar__link--muted">
-            <HeartIcon size={18} />
-            <span>Reviews</span>
-            <span className="tag tag--soon">Wk 6</span>
-          </div>
+          <span className="sidebar__label sidebar__label--spaced">
+            Coming soon
+          </span>
           <div className="sidebar__link sidebar__link--muted">
             <CompassIcon size={18} />
             <span>AR anchors</span>
@@ -84,12 +102,19 @@ export function DashboardLayout() {
             <ArrowIcon size={15} /> Open the traveler site
           </a>
           <div className="sidebar__user">
-            <span className="avatar avatar--sm">{initials(session?.user.displayName ?? 'Travelie Admin')}</span>
+            <span className="avatar avatar--sm">
+              {initials(session?.user.displayName ?? "Travelie Admin")}
+            </span>
             <div>
-              <strong>{session?.user.displayName ?? 'Travelie Admin'}</strong>
+              <strong>{session?.user.displayName ?? "Travelie Admin"}</strong>
               <span>{session?.user.email}</span>
             </div>
-            <button type="button" onClick={signOut} className="icon-btn" aria-label="Sign out">
+            <button
+              type="button"
+              onClick={signOut}
+              className="icon-btn"
+              aria-label="Sign out"
+            >
               <LogOutIcon size={17} />
             </button>
           </div>

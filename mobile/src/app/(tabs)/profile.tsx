@@ -21,10 +21,17 @@ import { api, assetUrl } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { memberSince } from '@/lib/format';
 
-const roadmap = [
-  { icon: 'map-outline', label: 'Maps & turn-by-turn GPS', when: 'Week 8' },
-  { icon: 'calendar-outline', label: 'Trip planner & budget', when: 'Week 9' },
-  { icon: 'scan-outline', label: 'AR navigation', when: 'Weeks 10–11' },
+const travelTools = [
+  {
+    icon: 'navigate-outline',
+    label: 'Find places nearby',
+    href: '/(tabs)/nearby',
+  },
+  {
+    icon: 'calendar-outline',
+    label: 'Plan trips & budget',
+    href: '/(tabs)/trips',
+  },
 ] as const;
 
 export default function ProfileScreen() {
@@ -33,6 +40,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
 
   const [savedCount, setSavedCount] = useState<number | null>(null);
+  const [tripCount, setTripCount] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.displayName ?? '');
   const [savingName, setSavingName] = useState(false);
@@ -45,6 +53,10 @@ export default function ProfileScreen() {
         .favorites()
         .then((list) => setSavedCount(list.length))
         .catch(() => setSavedCount(null));
+      api
+        .trips()
+        .then((list) => setTripCount(list.length))
+        .catch(() => setTripCount(null));
     }, []),
   );
 
@@ -71,7 +83,10 @@ export default function ProfileScreen() {
       });
       await updateUser(updated);
     } catch (cause) {
-      Alert.alert('Profile photo', cause instanceof Error ? cause.message : 'Upload failed.');
+      Alert.alert(
+        'Profile photo',
+        cause instanceof Error ? cause.message : 'Upload failed.',
+      );
     } finally {
       setUploading(false);
     }
@@ -88,7 +103,10 @@ export default function ProfileScreen() {
       await updateUser(updated);
       setEditing(false);
     } catch (cause) {
-      Alert.alert('Display name', cause instanceof Error ? cause.message : 'Could not save.');
+      Alert.alert(
+        'Display name',
+        cause instanceof Error ? cause.message : 'Could not save.',
+      );
     } finally {
       setSavingName(false);
     }
@@ -103,7 +121,11 @@ export default function ProfileScreen() {
     }
     Alert.alert('Sign out', 'Ready to leave your journey for now?', [
       { text: 'Stay', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: () => void performSignOut() },
+      {
+        text: 'Sign out',
+        style: 'destructive',
+        onPress: () => void performSignOut(),
+      },
     ]);
   };
 
@@ -120,7 +142,10 @@ export default function ProfileScreen() {
   return (
     <ScrollView
       style={styles.root}
-      contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingBottom: 130 }}
+      contentContainerStyle={{
+        paddingTop: insets.top + spacing.lg,
+        paddingBottom: 130,
+      }}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
@@ -129,8 +154,16 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.identityCard}>
-        <Pressable onPress={pickAvatar} style={styles.avatarWrap} accessibilityLabel="Change profile photo">
-          <Avatar name={user.displayName} uri={assetUrl(user.avatarUrl)} size={84} />
+        <Pressable
+          onPress={pickAvatar}
+          style={styles.avatarWrap}
+          accessibilityLabel="Change profile photo"
+        >
+          <Avatar
+            name={user.displayName}
+            uri={assetUrl(user.avatarUrl)}
+            size={84}
+          />
           <View style={styles.cameraBadge}>
             {uploading ? (
               <ActivityIndicator size="small" color={colors.cream} />
@@ -156,7 +189,11 @@ export default function ProfileScreen() {
                 {savingName ? (
                   <ActivityIndicator size="small" color={colors.teal} />
                 ) : (
-                  <Ionicons name="checkmark-circle" size={24} color={colors.teal} />
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={24}
+                    color={colors.teal}
+                  />
                 )}
               </Pressable>
               <Pressable
@@ -166,7 +203,11 @@ export default function ProfileScreen() {
                 }}
                 hitSlop={8}
               >
-                <Ionicons name="close-circle" size={24} color={colors.textMuted} />
+                <Ionicons
+                  name="close-circle"
+                  size={24}
+                  color={colors.textMuted}
+                />
               </Pressable>
             </View>
           ) : (
@@ -187,9 +228,13 @@ export default function ProfileScreen() {
           <Text style={styles.email}>{user.email}</Text>
           <View style={styles.metaRow}>
             <View style={styles.rolePill}>
-              <Text style={styles.roleText}>{user.role === 'ADMIN' ? 'Administrator' : 'Traveler'}</Text>
+              <Text style={styles.roleText}>
+                {user.role === 'ADMIN' ? 'Administrator' : 'Traveler'}
+              </Text>
             </View>
-            <Text style={styles.since}>Since {memberSince(user.createdAt)}</Text>
+            <Text style={styles.since}>
+              Since {memberSince(user.createdAt)}
+            </Text>
           </View>
         </View>
       </View>
@@ -200,32 +245,43 @@ export default function ProfileScreen() {
           <Text style={styles.statLabel}>Saved places</Text>
         </View>
         <View style={styles.statDivider} />
-        <Pressable style={styles.statBlock} onPress={() => router.push('/(tabs)/saved')}>
+        <Pressable
+          style={styles.statBlock}
+          onPress={() => router.push('/(tabs)/saved')}
+        >
           <Text style={styles.statValue}>PH</Text>
           <Text style={styles.statLabel}>Home country</Text>
         </Pressable>
         <View style={styles.statDivider} />
         <View style={styles.statBlock}>
-          <Text style={styles.statValue}>1</Text>
-          <Text style={styles.statLabel}>Upcoming trip</Text>
+          <Text style={styles.statValue}>{tripCount ?? '—'}</Text>
+          <Text style={styles.statLabel}>Planned trips</Text>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>On the roadmap</Text>
+        <Text style={styles.sectionTitle}>Travel tools</Text>
         <View style={styles.roadmapCard}>
-          {roadmap.map((item, index) => (
+          {travelTools.map((item, index) => (
             <View key={item.label}>
-              <View style={styles.roadmapRow}>
+              <Pressable
+                onPress={() => router.push(item.href)}
+                style={styles.roadmapRow}
+                accessibilityRole="button"
+              >
                 <View style={styles.roadmapIcon}>
                   <Ionicons name={item.icon} size={17} color={colors.pine} />
                 </View>
                 <Text style={styles.roadmapLabel}>{item.label}</Text>
-                <View style={styles.whenPill}>
-                  <Text style={styles.whenText}>{item.when}</Text>
-                </View>
-              </View>
-              {index < roadmap.length - 1 ? <View style={styles.divider} /> : null}
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={colors.textMuted}
+                />
+              </Pressable>
+              {index < travelTools.length - 1 ? (
+                <View style={styles.divider} />
+              ) : null}
             </View>
           ))}
         </View>
@@ -236,15 +292,27 @@ export default function ProfileScreen() {
         <View style={styles.roadmapCard}>
           <View style={styles.roadmapRow}>
             <View style={styles.roadmapIcon}>
-              <Ionicons name="shield-checkmark-outline" size={17} color={colors.pine} />
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={17}
+                color={colors.pine}
+              />
             </View>
             <Text style={styles.roadmapLabel}>Privacy & location</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+            <Ionicons
+              name="chevron-forward"
+              size={16}
+              color={colors.textMuted}
+            />
           </View>
           <View style={styles.divider} />
           <View style={styles.roadmapRow}>
             <View style={styles.roadmapIcon}>
-              <Ionicons name="information-circle-outline" size={17} color={colors.pine} />
+              <Ionicons
+                name="information-circle-outline"
+                size={17}
+                color={colors.pine}
+              />
             </View>
             <Text style={styles.roadmapLabel}>About Travelie</Text>
             <Text style={styles.version}>v0.1.0</Text>

@@ -15,7 +15,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
+import { DestinationMap } from '@/components/destination-map';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ReviewSection } from '@/components/review-section';
 import { colors, fonts, radius, shadow, spacing } from '@/constants/theme';
 import { api, assetUrl } from '@/lib/api';
 import { formatFee } from '@/lib/format';
@@ -50,7 +52,11 @@ export default function DestinationDetailScreen() {
       })
       .catch((cause) => {
         if (!active) return;
-        setError(cause instanceof Error ? cause.message : 'Unable to load this destination.');
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : 'Unable to load this destination.',
+        );
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -76,13 +82,41 @@ export default function DestinationDetailScreen() {
 
   const openInMaps = async () => {
     if (!destination) return;
-    const url = `https://www.google.com/maps/search/?api=1&query=${destination.latitude},${destination.longitude}`;
+    const coordinates = `${destination.latitude},${destination.longitude}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinates)}`;
     const supported = await Linking.canOpenURL(url);
     if (supported) await Linking.openURL(url);
-    else Alert.alert('Maps', 'No maps application is available on this device.');
+    else
+      Alert.alert('Maps', 'No maps application is available on this device.');
   };
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
+  const startNavigation = () => {
+    if (!destination) return;
+    router.push({
+      pathname: '/destination/navigate',
+      params: {
+        latitude: String(destination.latitude),
+        longitude: String(destination.longitude),
+        name: destination.name,
+        address: destination.address ?? destination.city.name,
+      },
+    });
+  };
+
+  const openCameraGuide = () => {
+    if (!destination) return;
+    router.push({
+      pathname: '/destination/ar',
+      params: {
+        latitude: String(destination.latitude),
+        longitude: String(destination.longitude),
+        name: destination.name,
+      },
+    });
+  };
+
+  const goBack = () =>
+    router.canGoBack() ? router.back() : router.replace('/(tabs)');
 
   if (loading) {
     return (
@@ -95,7 +129,11 @@ export default function DestinationDetailScreen() {
   if (error || !destination) {
     return (
       <View style={[styles.errorRoot, { paddingTop: insets.top + spacing.xl }]}>
-        <Pressable onPress={goBack} style={styles.floatingBack} accessibilityLabel="Go back">
+        <Pressable
+          onPress={goBack}
+          style={styles.floatingBack}
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={20} color={colors.ink} />
         </Pressable>
         <EmptyState
@@ -112,29 +150,48 @@ export default function DestinationDetailScreen() {
   const hero = assetUrl(destination.photos[0]?.url);
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={{ paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={{ paddingBottom: 48 }}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.hero}>
         {hero ? (
-          <Image source={{ uri: hero }} style={StyleSheet.absoluteFill} contentFit="cover" transition={250} />
+          <Image
+            source={{ uri: hero }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            transition={250}
+          />
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.heroFallback]}>
             <Ionicons name="compass-outline" size={48} color={colors.teal} />
           </View>
         )}
         <LinearGradient
-          colors={['rgba(11,31,28,0.62)', 'rgba(11,31,28,0.04)', 'rgba(11,31,28,0.45)']}
+          colors={[
+            'rgba(11,31,28,0.62)',
+            'rgba(11,31,28,0.04)',
+            'rgba(11,31,28,0.45)',
+          ]}
           locations={[0, 0.45, 1]}
           style={StyleSheet.absoluteFill}
         />
 
         <View style={[styles.heroTop, { paddingTop: insets.top + spacing.sm }]}>
-          <Pressable onPress={goBack} style={styles.glassButton} accessibilityLabel="Go back">
+          <Pressable
+            onPress={goBack}
+            style={styles.glassButton}
+            accessibilityLabel="Go back"
+          >
             <Ionicons name="arrow-back" size={20} color={colors.cream} />
           </Pressable>
           <Pressable
             onPress={toggleFavorite}
             style={styles.glassButton}
-            accessibilityLabel={favorite ? 'Remove from saved' : 'Save destination'}
+            accessibilityLabel={
+              favorite ? 'Remove from saved' : 'Save destination'
+            }
           >
             <Ionicons
               name={favorite ? 'heart' : 'heart-outline'}
@@ -156,7 +213,8 @@ export default function DestinationDetailScreen() {
         <View style={styles.locationRow}>
           <Ionicons name="location" size={14} color={colors.teal} />
           <Text style={styles.locationText}>
-            {destination.city.name} · {destination.city.country?.name ?? 'Philippines'}
+            {destination.city.name} ·{' '}
+            {destination.city.country?.name ?? 'Philippines'}
           </Text>
         </View>
         <Text style={styles.title}>{destination.name}</Text>
@@ -176,7 +234,9 @@ export default function DestinationDetailScreen() {
               <Ionicons name="ticket-outline" size={18} color={colors.pine} />
             </View>
             <Text style={styles.infoLabel}>Entrance</Text>
-            <Text style={styles.infoValue}>{formatFee(destination.entranceFee, destination.currency)}</Text>
+            <Text style={styles.infoValue}>
+              {formatFee(destination.entranceFee, destination.currency)}
+            </Text>
           </View>
           <View style={styles.infoCard}>
             <View style={styles.infoIcon}>
@@ -192,7 +252,9 @@ export default function DestinationDetailScreen() {
               <Ionicons name="heart-outline" size={18} color={colors.pine} />
             </View>
             <Text style={styles.infoLabel}>Saved by</Text>
-            <Text style={styles.infoValue}>{destination._count?.favorites ?? 0} travelers</Text>
+            <Text style={styles.infoValue}>
+              {destination._count?.favorites ?? 0} travelers
+            </Text>
           </View>
         </View>
 
@@ -208,10 +270,24 @@ export default function DestinationDetailScreen() {
           </View>
         ) : null}
 
+        <View style={styles.block}>
+          <Text style={styles.blockTitle}>Location</Text>
+          <DestinationMap
+            latitude={destination.latitude}
+            longitude={destination.longitude}
+            name={destination.name}
+            address={destination.address ?? destination.city.name}
+          />
+        </View>
+
         {destination.photos.length > 1 ? (
           <View style={styles.block}>
             <Text style={styles.blockTitle}>Gallery</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.gallery}
+            >
               {destination.photos.map((photo) => (
                 <Image
                   key={photo.id}
@@ -225,14 +301,27 @@ export default function DestinationDetailScreen() {
           </View>
         ) : null}
 
+        <View style={styles.block}>
+          <ReviewSection destinationId={destination.id} />
+        </View>
+
         <View style={styles.actions}>
-          <Button label="Open in Google Maps" onPress={openInMaps} icon="map-outline" />
-          <View style={styles.coordsRow}>
-            <Ionicons name="pin-outline" size={13} color={colors.textMuted} />
-            <Text style={styles.coords}>
-              {destination.latitude.toFixed(4)}, {destination.longitude.toFixed(4)}
-            </Text>
-          </View>
+          <Button
+            label="Start in-app navigation"
+            onPress={startNavigation}
+            icon="navigate-outline"
+          />
+          <Button
+            label="Camera compass preview"
+            onPress={openCameraGuide}
+            icon="scan-outline"
+            variant="secondary"
+          />
+          <Button
+            label="Open in Google Maps"
+            onPress={openInMaps}
+            icon="map-outline"
+          />
         </View>
       </View>
     </ScrollView>
@@ -438,16 +527,5 @@ const styles = StyleSheet.create({
   actions: {
     marginTop: spacing.xl,
     gap: spacing.md,
-  },
-  coordsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  coords: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    color: colors.textMuted,
   },
 });

@@ -7,6 +7,8 @@ import { useAuth } from '@/lib/auth-context';
 const icons = {
   index: { active: 'compass', idle: 'compass-outline' },
   saved: { active: 'heart', idle: 'heart-outline' },
+  nearby: { active: 'navigate', idle: 'navigate-outline' },
+  trips: { active: 'calendar', idle: 'calendar-outline' },
   profile: { active: 'person', idle: 'person-outline' },
 } as const;
 
@@ -15,7 +17,14 @@ export default function TabsLayout() {
 
   if (initializing) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.sand }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.sand,
+        }}
+      >
         <ActivityIndicator color={colors.teal} />
       </View>
     );
@@ -57,6 +66,8 @@ export default function TabsLayout() {
       })}
     >
       <Tabs.Screen name="index" options={{ title: 'Explore' }} />
+      <Tabs.Screen name="nearby" options={{ title: 'Nearby' }} />
+      <Tabs.Screen name="trips" options={{ title: 'My trips' }} />
       <Tabs.Screen name="saved" options={{ title: 'Saved' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>

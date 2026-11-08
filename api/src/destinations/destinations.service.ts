@@ -1,10 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { QueryNearbyDto } from './dto/query-nearby.dto.js';
 import { QueryDestinationsDto } from './dto/query-destinations.dto.js';
 
 const destinationInclude = {
-  city: { select: { id: true, name: true, slug: true, country: { select: { name: true, code: true } } } },
+  city: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      country: { select: { name: true, code: true } },
+    },
+  },
   categories: { select: { id: true, name: true, slug: true } },
   photos: { orderBy: { sortOrder: 'asc' as const } },
   _count: { select: { favorites: true } },
@@ -61,6 +69,41 @@ export class DestinationsService {
         totalPages: Math.ceil(total / query.limit),
       },
     };
+  }
+
+  async findNearby(query: QueryNearbyDto) {
+    const radiusMeters = query.radiusKm * 1000;
+    const nearby = await this.prisma.$queryRaw<
+      Array<{ id: string; distanceMeters: number }>
+    >`
+      SELECT "id", ST_Distance(
+        "location",
+        ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography
+      ) AS "distanceMeters"
+      FROM "Destination"
+      WHERE "isPublished" = true
+        AND "location" IS NOT NULL
+        AND ST_DWithin(
+          "location",
+          ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography,
+          ${radiusMeters}
+        )
+      ORDER BY "distanceMeters" ASC
+      LIMIT 50
+    `;
+    if (!nearby.length) return [];
+
+    const destinations = await this.prisma.destination.findMany({
+      where: { id: { in: nearby.map((place) => place.id) } },
+      include: destinationInclude,
+    });
+    const byId = new Map(
+      destinations.map((destination) => [destination.id, destination]),
+    );
+    return nearby.flatMap(({ id, distanceMeters }) => {
+      const destination = byId.get(id);
+      return destination ? [{ ...destination, distanceMeters }] : [];
+    });
   }
 
   async findBySlug(slug: string) {

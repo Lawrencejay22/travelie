@@ -6,6 +6,8 @@ export interface AppConfig {
   jwtAccessTtl: string;
   corsOrigins: string[];
   publicApiUrl: string;
+  googleMapsApiKey?: string;
+  googleOAuthClientIds: string[];
 }
 
 export function loadConfig(): AppConfig {
@@ -26,10 +28,17 @@ export function loadConfig(): AppConfig {
     databaseUrl,
     jwtAccessSecret,
     jwtAccessTtl: env.JWT_ACCESS_TTL ?? '15m',
-    corsOrigins: (env.CORS_ORIGIN ?? 'http://localhost:5173,http://localhost:8081')
+    corsOrigins: (
+      env.CORS_ORIGIN ?? 'http://localhost:5173,http://localhost:8081'
+    )
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean),
     publicApiUrl: env.PUBLIC_API_URL ?? 'http://localhost:4000',
+    googleMapsApiKey: env.GOOGLE_MAPS_API_KEY,
+    googleOAuthClientIds: (env.GOOGLE_OAUTH_CLIENT_IDS ?? '')
+      .split(',')
+      .map((clientId) => clientId.trim())
+      .filter(Boolean),
   };
 }

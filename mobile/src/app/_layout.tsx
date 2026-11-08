@@ -1,8 +1,17 @@
-import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
-import { Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+  DMSans_700Bold,
+} from '@expo-google-fonts/dm-sans';
+import {
+  Fraunces_600SemiBold,
+  Fraunces_700Bold,
+} from '@expo-google-fonts/fraunces';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as WebBrowser from 'expo-web-browser';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,6 +19,7 @@ import { colors } from '@/constants/theme';
 import { AuthProvider } from '@/lib/auth-context';
 
 SplashScreen.preventAutoHideAsync();
+WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -45,7 +55,22 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="destination/[slug]" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen
+            name="destination/[slug]"
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="destination/navigate"
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="destination/ar"
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="trips/[id]"
+            options={{ animation: 'slide_from_right' }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

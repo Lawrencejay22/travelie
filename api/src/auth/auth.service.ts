@@ -2,24 +2,25 @@ import { randomBytes, createHash } from 'node:crypto';
 import {
   ConflictException,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { publicUserSelect, type PublicUser } from '../users/users.types.js';
 import type { JwtPayload, Session } from './auth.types.js';
-import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
 
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
 const BCRYPT_ROUNDS = 12;
 
-const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
+const hashToken = (token: string) =>
+  createHash('sha256').update(token).digest('hex');
 const createOpaqueToken = () => randomBytes(48).toString('base64url');
 
 @Injectable()
@@ -53,7 +54,9 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email.toLowerCase() },
     });
-    const valid = user ? await bcrypt.compare(dto.password, user.passwordHash) : false;
+    const valid = user
+      ? await bcrypt.compare(dto.password, user.passwordHash)
+      : false;
     if (!user || !valid) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -61,6 +64,70 @@ export class AuthService {
     const { passwordHash: _passwordHash, ...rest } = user;
     const publicUser = this.toPublicUser(rest);
     return this.createSession(publicUser, userAgent);
+  }
+
+  async googleLogin(idToken: string, userAgent?: string): Promise<Session> {
+    const clientIds = this.config.get<string[]>('googleOAuthClientIds') ?? [];
+    if (!clientIds.length) {
+      throw new ServiceUnavailableException(
+        'Google sign-in is not configured on this server',
+      );
+    }
+
+    let payload: TokenPayload | undefined;
+    try {
+      const ticket = await new OAuth2Client().verifyIdToken({
+        idToken,
+        audience: clientIds,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException(
+        'Google sign-in token could not be verified',
+      );
+    }
+
+    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+      throw new UnauthorizedException(
+        'Google account must have a verified email address',
+      );
+    }
+
+    const linkedUser = await this.prisma.user.findUnique({
+      where: { googleId: payload.sub },
+      select: publicUserSelect,
+    });
+    if (linkedUser) return this.createSession(linkedUser, userAgent);
+
+    const email = payload.email.toLowerCase();
+    const existing = await this.prisma.user.findUnique({
+      where: { email },
+      select: { ...publicUserSelect, googleId: true },
+    });
+    if (existing?.googleId && existing.googleId !== payload.sub) {
+      throw new ConflictException(
+        'This email is linked to a different Google account',
+      );
+    }
+
+    const user = existing
+      ? await this.prisma.user.update({
+          where: { id: existing.id },
+          data: { googleId: payload.sub },
+          select: publicUserSelect,
+        })
+      : await this.prisma.user.create({
+          data: {
+            email,
+            googleId: payload.sub,
+            displayName: payload.name?.trim() || email.split('@')[0],
+            avatarUrl: payload.picture,
+            passwordHash: await bcrypt.hash(createOpaqueToken(), BCRYPT_ROUNDS),
+          },
+          select: publicUserSelect,
+        });
+
+    return this.createSession(user, userAgent);
   }
 
   async refresh(refreshToken: string, userAgent?: string): Promise<Session> {
@@ -98,28 +165,10 @@ export class AuthService {
     return { message: 'Signed out' };
   }
 
-  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; devResetToken?: string }> {
-    const message = 'If an account exists for that email, a reset link has been sent.';
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase() },
-    });
-    if (!user) {
-      return { message };
-    }
-
-    await this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null } });
-    const token = createOpaqueToken();
-    await this.prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: hashToken(token),
-        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
-      },
-    });
-
-    // Email delivery lands in a later milestone; expose the token for local testing only.
-    const isProduction = this.config.get<string>('nodeEnv') === 'production';
-    return isProduction ? { message } : { message, devResetToken: token };
+  async forgotPassword(): Promise<never> {
+    throw new ServiceUnavailableException(
+      'Password reset is unavailable because email delivery is not configured',
+    );
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
@@ -132,7 +181,10 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { passwordHash },
+      }),
       this.prisma.passwordResetToken.update({
         where: { id: record.id },
         data: { usedAt: new Date() },
@@ -146,8 +198,15 @@ export class AuthService {
     return { message: 'Password has been reset. You can sign in now.' };
   }
 
-  private async createSession(user: PublicUser, userAgent?: string): Promise<Session> {
-    const payload: JwtPayload = { sub: user.id, email: user.email, role: user.role };
+  private async createSession(
+    user: PublicUser,
+    userAgent?: string,
+  ): Promise<Session> {
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
     const accessToken = await this.jwt.signAsync(payload);
     const refreshToken = createOpaqueToken();
 

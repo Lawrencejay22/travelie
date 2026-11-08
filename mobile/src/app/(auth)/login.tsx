@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AuthShell } from '@/components/auth-shell';
+import { GoogleSignIn } from '@/components/google-sign-in';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { colors, fonts, radius, spacing } from '@/constants/theme';
@@ -75,6 +76,7 @@ export default function LoginScreen() {
       </Pressable>
 
       <Button label="Sign in" onPress={submit} loading={loading} icon="arrow-forward" />
+      <GoogleSignIn />
 
       <Pressable
         onPress={() => {

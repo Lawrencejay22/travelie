@@ -21,7 +21,12 @@ interface AuthContextValue {
   user: User | null;
   initializing: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (payload: { email: string; displayName: string; password: string }) => Promise<void>;
+  signInWithGoogle: (idToken: string) => Promise<void>;
+  signUp: (payload: {
+    email: string;
+    displayName: string;
+    password: string;
+  }) => Promise<void>;
   signOut: () => Promise<void>;
   updateUser: (user: User) => Promise<void>;
 }
@@ -74,8 +79,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signUp = useCallback(
-    async (payload: { email: string; displayName: string; password: string }) => {
-      const next = await api.register({ ...payload, email: payload.email.trim() });
+    async (payload: {
+      email: string;
+      displayName: string;
+      password: string;
+    }) => {
+      const next = await api.register({
+        ...payload,
+        email: payload.email.trim(),
+      });
+      await applySession(next);
+    },
+    [applySession],
+  );
+
+  const signInWithGoogle = useCallback(
+    async (idToken: string) => {
+      const next = await api.googleLogin(idToken);
       await applySession(next);
     },
     [applySession],
@@ -105,11 +125,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       initializing,
       signIn,
+      signInWithGoogle,
       signUp,
       signOut,
       updateUser,
     }),
-    [session, initializing, signIn, signUp, signOut, updateUser],
+    [
+      session,
+      initializing,
+      signIn,
+      signInWithGoogle,
+      signUp,
+      signOut,
+      updateUser,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

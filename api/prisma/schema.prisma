@@ -13,9 +13,16 @@ enum Role {
   ADMIN
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
+  googleId     String?  @unique
   passwordHash String
   displayName  String
   avatarUrl    String?
@@ -26,6 +33,9 @@ model User {
   refreshTokens      RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   favorites          Favorite[]
+  reviews            Review[]
+  reviewReports      ReviewReport[]
+  trips              Trip[]
 
   @@index([role])
 }
@@ -105,13 +115,14 @@ model Destination {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Populated by a database trigger; used for PostGIS nearby queries.
   location Unsupported("geography(Point, 4326)")?
 
   city       City                @relation(fields: [cityId], references: [id], onDelete: Restrict)
   categories Category[]
   photos     DestinationPhoto[]
   favorites  Favorite[]
+  reviews    Review[]
+  tripStops  TripStop[]
 
   @@index([cityId])
   @@index([isPublished, isFeatured])
@@ -139,4 +150,86 @@ model Favorite {
 
   @@id([userId, destinationId])
   @@index([destinationId])
+}
+
+model Review {
+  id            String       @id @default(cuid())
+  userId        String
+  destinationId String
+  rating        Int
+  title         String?
+  content       String
+  status        ReviewStatus @default(PENDING)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  reports     ReviewReport[]
+
+  @@unique([userId, destinationId])
+  @@index([destinationId, status, createdAt])
+}
+
+model ReviewReport {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([createdAt])
+}
+
+model Trip {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops    TripStop[]
+  expenses TripExpense[]
+
+  @@index([userId, updatedAt])
+}
+
+model TripStop {
+  id            String   @id @default(cuid())
+  tripId        String
+  destinationId String
+  day           Int      @default(1)
+  sortOrder     Int      @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  trip        Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Restrict)
+
+  @@unique([tripId, day, sortOrder])
+  @@index([tripId, day, sortOrder])
+}
+
+model TripExpense {
+  id          String   @id @default(cuid())
+  tripId      String
+  title       String
+  category    String
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("PHP")
+  incurredAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, incurredAt])
 }
