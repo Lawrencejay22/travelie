@@ -33,7 +33,10 @@ export class AuthService {
 
   async register(dto: RegisterDto, userAgent?: string): Promise<Session> {
     const email = dto.email.toLowerCase();
-    const existing = await this.prisma.user.findUnique({ where: { email } });
+    const existing = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
     if (existing) {
       throw new ConflictException('An account with this email already exists');
     }
@@ -53,6 +56,7 @@ export class AuthService {
   async login(dto: LoginDto, userAgent?: string): Promise<Session> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email.toLowerCase() },
+      select: { ...publicUserSelect, passwordHash: true },
     });
     const valid = user
       ? await bcrypt.compare(dto.password, user.passwordHash)
@@ -61,8 +65,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const { passwordHash: _passwordHash, ...rest } = user;
-    const publicUser = this.toPublicUser(rest);
+    const { passwordHash: _passwordHash, ...publicUser } = user;
     return this.createSession(publicUser, userAgent);
   }
 

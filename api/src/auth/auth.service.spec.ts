@@ -1,4 +1,8 @@
-import { ServiceUnavailableException } from '@nestjs/common';
+import {
+  ConflictException,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -25,5 +29,46 @@ describe('AuthService', () => {
       ServiceUnavailableException,
     );
     expect(findUser).not.toHaveBeenCalled();
+  });
+
+  it('limits login lookup to columns available before the additive migration', async () => {
+    findUser.mockResolvedValue(null);
+
+    await expect(
+      service.login({
+        email: 'admin@travelie.app',
+        password: 'invalid-password',
+      }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+
+    expect(findUser).toHaveBeenCalledWith({
+      where: { email: 'admin@travelie.app' },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        role: true,
+        createdAt: true,
+        passwordHash: true,
+      },
+    });
+  });
+
+  it('checks registration conflicts without selecting columns added by the migration', async () => {
+    findUser.mockResolvedValue({ id: 'existing-user' });
+
+    await expect(
+      service.register({
+        email: 'admin@travelie.app',
+        password: 'unused-password',
+        displayName: 'Admin',
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
+
+    expect(findUser).toHaveBeenCalledWith({
+      where: { email: 'admin@travelie.app' },
+      select: { id: true },
+    });
   });
 });
