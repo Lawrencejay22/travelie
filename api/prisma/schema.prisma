@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TRAVELER
+  CONTENT_MANAGER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  avatarUrl    String?
+  role         Role     @default(TRAVELER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens      RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  favorites          Favorite[]
+
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Country {
+  id     String @id @default(cuid())
+  code   String @unique
+  name   String
+  cities City[]
+}
+
+model City {
+  id         String  @id @default(cuid())
+  name       String
+  slug       String
+  countryId  String
+  latitude   Float
+  longitude  Float
+
+  country      Country       @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  destinations Destination[]
+
+  @@unique([countryId, slug])
+  @@index([countryId])
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  destinations Destination[]
+}
+
+model Destination {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  summary      String
+  description  String
+  latitude     Float
+  longitude    Float
+  address      String?
+  openingHours String?
+  entranceFee  Decimal? @db.Decimal(10, 2)
+  currency     String   @default("PHP")
+  isPublished  Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  cityId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Populated by a database trigger; used for PostGIS nearby queries.
+  location Unsupported("geography(Point, 4326)")?
+
+  city       City                @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  categories Category[]
+  photos     DestinationPhoto[]
+  favorites  Favorite[]
+
+  @@index([cityId])
+  @@index([isPublished, isFeatured])
+}
+
+model DestinationPhoto {
+  id            String @id @default(cuid())
+  url           String
+  alt           String?
+  sortOrder     Int    @default(0)
+  destinationId String
+
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@index([destinationId])
+}
+
+model Favorite {
+  userId        String
+  destinationId String
+  createdAt     DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, destinationId])
+  @@index([destinationId])
+}
