@@ -12,6 +12,6 @@ Run the API from `api`, the Vite website from `web`, and the mobile/Expo app fro
 
 Vercel build configuration is included for the separate Vite website (`web`) and the optional Expo Web export (`mobile`). Deploy either or both as separate projects using the matching root directory, and set each public API URL after the API is deployed.
 
-The API deployment and database migration are intentionally pending. Back up the target database, configure production secrets, and review the additive Prisma migration before applying it. Never commit `.env` files or provider secrets.
+The [Render Blueprint](render.yaml) prepares the API service but does not deploy or run database migrations by itself. Before creating the Render service, rotate any exposed database credentials, configure the required production environment values in Render, take a database backup, and explicitly apply the additive Prisma migration. Never commit `.env` files or provider secrets.
 
 Google Routes API access is optional and requires a server-side key. Without it, use the external maps navigation fallback.

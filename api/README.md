@@ -105,6 +105,14 @@ Google Routes API access and Google OAuth client IDs are independent settings. K
 
 Password reset is disabled until a trusted email delivery provider is configured. The API does not expose reset tokens in responses.
 
+### Deploying to Render
+
+The repository-root `render.yaml` defines the API web service, build, and health check. In Render, create a Blueprint from the repository and select the intended branch. Set `DATABASE_URL`, `CORS_ORIGIN`, and `PUBLIC_API_URL` in the Render dashboard; keep credentials private. Render generates `JWT_ACCESS_SECRET`. Google OAuth client IDs are optional. The Routes API key is optional; without it, server-computed routes are unavailable.
+
+The Blueprint does not run database migrations or seed data. Back up the intended database, rotate any previously exposed database password, verify the Render `DATABASE_URL` points to the correct database, then apply migrations as a separate deliberate step. Until the reviews/trips migration is applied, those new endpoints are not ready for use.
+
+The API currently stores uploaded files on local disk. Render's local filesystem is ephemeral, so uploads do not persist across deploys/restarts; configure durable object storage before relying on avatar uploads in production.
+
 The API exposes `GET /api/destinations/nearby`, `POST /api/navigation/route`, `/api/reviews`, and `/api/trips`; the authenticated moderation endpoints are `/api/reviews/moderation/pending` and `PATCH /api/reviews/:id/moderation`.
 
 ---
