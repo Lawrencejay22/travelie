@@ -102,7 +102,6 @@ export default function ExploreScreen() {
       const list = await api.favorites();
       setFavoriteIds(new Set(list.map((destination) => destination.id)));
     } catch {
-      // A failed favorites refresh should never block discovery.
     }
   }, []);
 

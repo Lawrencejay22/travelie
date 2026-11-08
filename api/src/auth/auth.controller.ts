@@ -1,10 +1,18 @@
-import { Body, Controller, Get, Headers, HttpCode, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from '../users/users.service.js';
 import { AuthService } from './auth.service.js';
 import type { JwtPayload } from './auth.types.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
-import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
+import { GoogleLoginDto } from './dto/google-login.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
@@ -20,7 +28,10 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto, @Headers('user-agent') userAgent?: string) {
+  register(
+    @Body() dto: RegisterDto,
+    @Headers('user-agent') userAgent?: string,
+  ) {
     return this.authService.register(dto, userAgent);
   }
 
@@ -30,9 +41,21 @@ export class AuthController {
     return this.authService.login(dto, userAgent);
   }
 
+  @Post('google')
+  @HttpCode(200)
+  googleLogin(
+    @Body() dto: GoogleLoginDto,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    return this.authService.googleLogin(dto.idToken, userAgent);
+  }
+
   @Post('refresh')
   @HttpCode(200)
-  refresh(@Body() dto: RefreshTokenDto, @Headers('user-agent') userAgent?: string) {
+  refresh(
+    @Body() dto: RefreshTokenDto,
+    @Headers('user-agent') userAgent?: string,
+  ) {
     return this.authService.refresh(dto.refreshToken, userAgent);
   }
 
@@ -44,8 +67,8 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(200)
-  forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto);
+  forgotPassword() {
+    return this.authService.forgotPassword();
   }
 
   @Post('reset-password')

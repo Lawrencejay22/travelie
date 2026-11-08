@@ -128,7 +128,7 @@ export function DestinationRow({
           <Text style={styles.rowTag}>{formatFee(destination.entranceFee, destination.currency)}</Text>
         </View>
       </View>
-      <Heart active={favorite} onPress={onToggleFavorite} />
+      {onToggleFavorite ? <Heart active={favorite} onPress={onToggleFavorite} /> : null}
     </Pressable>
   );
 }
