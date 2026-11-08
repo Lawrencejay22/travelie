@@ -3,7 +3,7 @@
 > **Public landing page and administrator console built with Vite, React 19, and React Router.**
 > Provides administrative management for destinations, travelers, review moderation, and platform analytics.
 
-For full-stack setup and prerequisites, refer to the [workspace README](../README.md).
+This is the separate Vite website and admin console. It is not the Expo Web export of the mobile app. For the mobile app and its optional web export, see [mobile](../mobile/README.md). For full-stack setup and prerequisites, refer to the [workspace README](../README.md).
 
 ---
 
