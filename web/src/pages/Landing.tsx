@@ -15,7 +15,7 @@ const phases = [
   { weeks: 'Weeks 8–9', title: 'Navigation & planning', detail: 'Google Maps routing, GPS guidance, itineraries and a trip budget manager.' },
   { weeks: 'Weeks 10–11', title: 'Augmented reality', detail: 'Native ARCore module, compass overlay and geospatial anchors with map fallback.' },
   { weeks: 'Weeks 12–13', title: 'Administration', detail: 'Role-based admin dashboard, destination CMS and review moderation.' },
-  { weeks: 'Weeks 14–16', title: 'Release', detail: 'Security review, device testing, Play Console preparation and submission.' },
+  { weeks: 'Weeks 14–16', title: 'Release', detail: 'Security review, device testing, and sharing the Android app as a direct APK download.' },
 ];
 
 const features = [
@@ -36,6 +36,29 @@ const features = [
   },
 ];
 
+const travelSteps = [
+  {
+    number: '01',
+    title: 'Find inspiration',
+    body: 'Browse places across the Philippines and see what makes each destination special.',
+  },
+  {
+    number: '02',
+    title: 'Choose your stops',
+    body: 'Check location details and reviews, then save places you want to remember.',
+  },
+  {
+    number: '03',
+    title: 'Plan your trip',
+    body: 'Arrange your stops into an itinerary and keep an eye on your travel budget.',
+  },
+  {
+    number: '04',
+    title: 'Head out exploring',
+    body: 'Use maps, routes and nearby-place guidance to help you find your way.',
+  },
+];
+
 const currentYear = new Date().getFullYear();
 const androidApkUrl = import.meta.env.VITE_ANDROID_APK_URL?.trim();
 const hasAndroidApkUrl = Boolean(androidApkUrl && /^https:\/\//i.test(androidApkUrl));
@@ -53,7 +76,7 @@ export function Landing() {
           <a href="mailto:gabionzalawrencejay@gmail.com">Contact</a>
           <a href="#demo">Demo Video</a>
           <a href="#about-app">About the App</a>
-          <a href="#profile">Profile</a>
+          <a href="#developers">Developers</a>
         </nav>
         <a href="#install" className="btn btn--ghost-light btn--sm landing__install-link">
           Install Mobile App <ArrowIcon size={15} />
@@ -144,8 +167,10 @@ export function Landing() {
           <span className="eyebrow">Why Travelie</span>
           <h2>One app from inspiration to arrival.</h2>
           <p>
-            A premium travel companion built solo, milestone by milestone — no clutter, no
-            dead ends, every feature shipped with a working fallback.
+            Travelie is a travel companion for exploring the Philippines. Discover
+            destinations, find places nearby, and read traveler reviews before you go.
+            Save your favorites, plan trip stops and expenses, then use maps and
+            navigation to help guide your journey.
           </p>
         </div>
         <div className="feature-grid">
@@ -156,6 +181,72 @@ export function Landing() {
               <p>{feature.body}</p>
             </article>
           ))}
+        </div>
+        <div className="travel-steps">
+          <div className="travel-steps__heading">
+            <span className="eyebrow">How it works</span>
+            <h3>From “where should we go?” to “we made it.”</h3>
+            <p>
+              Travelie helps bring the pieces of a trip together, so you can spend
+              less time switching between tools and more time enjoying the journey.
+            </p>
+          </div>
+          <ol className="travel-steps__list">
+            {travelSteps.map((step) => (
+              <li key={step.number} className="travel-steps__item">
+                <span className="travel-steps__number">{step.number}</span>
+                <h4>{step.title}</h4>
+                <p>{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div id="developers" className="builder-section">
+          <div className="builder-section__heading">
+            <span className="eyebrow">Meet the builder</span>
+            <h3>Why I’m building Travelie.</h3>
+            <p>
+              I’m building Travelie to make exploring the Philippines feel easier
+              and more connected—from the first spark of inspiration to finding
+              your way at the destination.
+            </p>
+          </div>
+          <article className="builder-card">
+            <span className="builder-card__avatar" aria-hidden="true">LJ</span>
+            <div className="builder-card__details">
+              <h4>Lawrence Jay Gabionza</h4>
+              <p>Creator &amp; Developer</p>
+            </div>
+            <CompassIcon size={22} />
+          </article>
+          <div className="builder-story">
+            <article className="builder-story__item">
+              <span className="builder-story__number">01</span>
+              <h4>Why a mobile app?</h4>
+              <p>
+                Travel happens on the move. The app brings destination discovery,
+                nearby places, saved favorites, trip plans, budgets, and
+                navigation along for the journey.
+              </p>
+            </article>
+            <article className="builder-story__item">
+              <span className="builder-story__number">02</span>
+              <h4>Why a website?</h4>
+              <p>
+                A trip often starts with a question. The website helps travelers
+                understand what Travelie offers, explore its features, and find
+                the app when they are ready.
+              </p>
+            </article>
+            <article className="builder-story__item builder-story__item--vision">
+              <span className="builder-story__number">03</span>
+              <h4>One connected experience</h4>
+              <p>
+                Together, the website and app make it easier to go from “I want
+                to explore” to planning a trip and setting out with confidence.
+              </p>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -238,7 +329,7 @@ export function Landing() {
       <section id="roadmap" className="roadmap">
         <div className="section-heading section-heading--left">
           <span className="eyebrow">Build sequence</span>
-          <h2>From foundation to Google Play.</h2>
+          <h2>From foundation to a ready-to-install app.</h2>
           <p>The starter in this repository covers Weeks 1–2 and the discovery foundation that follows.</p>
         </div>
         <ol className="timeline">
@@ -253,22 +344,6 @@ export function Landing() {
             </li>
           ))}
         </ol>
-      </section>
-
-      <section id="profile" className="cta">
-        <div className="cta__inner">
-          <div>
-            <span className="eyebrow eyebrow--light">Your travel life, in one place</span>
-            <h2>Make Travelie yours.</h2>
-            <p>
-              Create your traveler profile in the mobile app to keep your saved
-              destinations and trip plans close at hand.
-            </p>
-          </div>
-          <a href="#install" className="btn btn--coral">
-            Get the mobile app <ArrowIcon size={16} />
-          </a>
-        </div>
       </section>
 
       <section id="install" className="app-install">

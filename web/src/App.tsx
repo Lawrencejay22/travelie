@@ -9,7 +9,7 @@ import { Users } from "./pages/Users";
 import { getSession } from "./lib/api";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  if (!getSession()) {
+  if (getSession()?.user.role !== "ADMIN") {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;

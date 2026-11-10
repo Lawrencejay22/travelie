@@ -11,7 +11,7 @@ export function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (getSession()) {
+  if (getSession()?.user.role === 'ADMIN') {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -27,7 +27,7 @@ export function Login() {
       setLoading(true);
       const session = await api.login(email.trim(), password);
       if (session.user.role !== 'ADMIN') {
-        setError('This console is reserved for Travelie administrators.');
+        setError('Only authorized Travelie developer accounts can access this console.');
         return;
       }
       setSession(session);
@@ -71,11 +71,10 @@ export function Login() {
           <div className="auth__mobile-brand">
             <Logo />
           </div>
-          <span className="eyebrow">Administrator access</span>
+          <span className="eyebrow">Developer access</span>
           <h2>Welcome back.</h2>
           <p className="auth__lede">
-            Sign in with an administrator account to manage the Travelie catalog and watch the
-            platform grow.
+            This private workspace is for authorized Travelie developers only.
           </p>
 
           <form className="auth__form" onSubmit={submit}>
@@ -85,7 +84,7 @@ export function Login() {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@travelie.app"
+                placeholder="Developer email"
                 autoComplete="email"
                 required
               />
