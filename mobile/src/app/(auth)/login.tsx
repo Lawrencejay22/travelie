@@ -16,19 +16,30 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const submit = async () => {
+    if (loading) return;
     setError(null);
-    if (!email.trim() || !password) {
+    const normalizedEmail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError('Enter a valid email address.');
+      return;
+    }
+    if (normalizedEmail.length > 254 || !password || password.length > 72) {
       setError('Enter your email and password to continue.');
       return;
     }
     try {
       setLoading(true);
-      await signIn(email, password);
+      await signIn(normalizedEmail, password);
       router.replace('/(tabs)');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Unable to sign in right now.');
+      setError(
+        cause instanceof TypeError
+          ? 'Unable to connect to Travelie. Check your connection and try again.'
+          : cause instanceof Error
+            ? cause.message
+            : 'Unable to sign in right now.',
+      );
     } finally {
       setLoading(false);
     }
@@ -57,6 +68,8 @@ export default function LoginScreen() {
         autoCapitalize="none"
         autoComplete="email"
         textContentType="emailAddress"
+        maxLength={254}
+        returnKeyType="next"
       />
       <Field
         label="Password"
@@ -68,8 +81,14 @@ export default function LoginScreen() {
         autoCapitalize="none"
         autoComplete="password"
         textContentType="password"
-        error={error ?? undefined}
+        maxLength={72}
+        returnKeyType="go"
+        onSubmitEditing={() => {
+          void submit();
+        }}
       />
+
+      {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
 
       <Pressable onPress={() => router.push('/forgot-password')} style={styles.forgotRow} hitSlop={8}>
         <Text style={styles.forgotText}>Forgot password?</Text>
@@ -134,6 +153,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     marginTop: spacing.xs,
+  },
+  error: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.danger,
+    marginTop: -spacing.sm,
   },
   demoIcon: {
     width: 34,

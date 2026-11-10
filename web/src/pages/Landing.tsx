@@ -4,6 +4,7 @@ import {
   ArrowIcon,
   CalendarIcon,
   CompassIcon,
+  HeartIcon,
   MapIcon,
   PinIcon,
   SparkIcon,
@@ -255,30 +256,76 @@ export function Landing() {
           <span className="eyebrow">About the app</span>
           <h2>One thoughtful companion for the whole trip.</h2>
           <p>
-            Travelie brings Philippine destinations, practical planning tools and the
-            freedom to explore together in one mobile experience.
+            Travelie helps you explore destinations across the Philippines, get
+            ready for the journey, and keep your plans close while you travel.
+            Start by finding a place that interests you, then build a trip around
+            the experiences you want to have.
+          </p>
+          <p>
+            Save places for later, check what other travelers think, organize
+            stops and expenses, and use maps and guidance when it is time to head
+            out. Your profile keeps your travel activity together in one place.
           </p>
         </div>
         <div className="app-overview__highlights">
           <article>
             <CompassIcon size={20} />
             <div>
-              <h3>Discover places</h3>
-              <p>Browse destinations, find nearby spots and save the ones you love.</p>
+              <h3>Explore destinations</h3>
+              <p>
+                Browse Philippine destinations, photos, details, entrance fees,
+                and opening information to find a place that fits your trip.
+              </p>
+            </div>
+          </article>
+          <article>
+            <PinIcon size={20} />
+            <div>
+              <h3>Find places nearby</h3>
+              <p>
+                Use your location to discover destinations around you while you
+                are exploring.
+              </p>
+            </div>
+          </article>
+          <article>
+            <HeartIcon size={20} />
+            <div>
+              <h3>Save favorites and share reviews</h3>
+              <p>
+                Keep interesting places in your saved list and read or leave
+                reviews to help travelers choose.
+              </p>
             </div>
           </article>
           <article>
             <MapIcon size={20} />
             <div>
-              <h3>Find your way</h3>
-              <p>Explore destination details, maps and route guidance along the way.</p>
+              <h3>Navigate with confidence</h3>
+              <p>
+                View destinations on a map, calculate a route, and follow
+                navigation steps as you make your way there.
+              </p>
             </div>
           </article>
           <article>
             <CalendarIcon size={20} />
             <div>
-              <h3>Plan together</h3>
-              <p>Organize trips, keep track of expenses and make room for spontaneity.</p>
+              <h3>Plan trips and expenses</h3>
+              <p>
+                Arrange trip stops into an itinerary and track your travel
+                expenses and budget.
+              </p>
+            </div>
+          </article>
+          <article>
+            <CompassIcon size={20} />
+            <div>
+              <h3>Try camera-and-compass guidance</h3>
+              <p>
+                Open the AR guidance preview for a camera and compass view to
+                help orient you near a destination.
+              </p>
             </div>
           </article>
         </div>

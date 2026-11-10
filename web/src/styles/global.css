@@ -433,9 +433,8 @@ code {
 
 .app-overview {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 72px;
+  grid-template-columns: 1fr;
+  gap: 34px;
   max-width: 1200px;
   margin: 0 auto;
   padding: 100px 48px;
@@ -462,15 +461,16 @@ code {
 }
 
 .app-overview__highlights {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .app-overview__highlights article {
   display: flex;
   align-items: flex-start;
   gap: 16px;
+  min-height: 145px;
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -2329,10 +2329,13 @@ code {
   }
 
   .app-overview {
-    grid-template-columns: 1fr;
-    gap: 36px;
+    gap: 30px;
     padding-left: 32px;
     padding-right: 32px;
+  }
+
+  .app-overview__highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .demo {
@@ -2536,6 +2539,10 @@ code {
   .app-overview {
     padding-top: 72px;
     padding-bottom: 72px;
+  }
+
+  .app-overview__highlights {
+    grid-template-columns: 1fr;
   }
 
   .demo {

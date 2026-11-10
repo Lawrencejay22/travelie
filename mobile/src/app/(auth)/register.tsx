@@ -16,19 +16,21 @@ export default function RegisterScreen() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const submit = async () => {
+    if (loading) return;
     setError(null);
-    if (displayName.trim().length < 2) {
+    const normalizedName = displayName.trim();
+    const normalizedEmail = email.trim();
+    if (normalizedName.length < 2 || normalizedName.length > 60) {
       setError('Tell us your name so locals can greet you.');
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    if (normalizedEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       setError('Enter a valid email address.');
       return;
     }
-    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-      setError('Use at least 8 characters, including a letter and a number.');
+    if (password.length < 8 || password.length > 72 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError('Use 8–72 characters, including a letter and a number.');
       return;
     }
     if (password !== confirm) {
@@ -38,10 +40,16 @@ export default function RegisterScreen() {
 
     try {
       setLoading(true);
-      await signUp({ displayName: displayName.trim(), email, password });
+      await signUp({ displayName: normalizedName, email: normalizedEmail, password });
       router.replace('/(tabs)');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Unable to create your account.');
+      setError(
+        cause instanceof TypeError
+          ? 'Unable to connect to Travelie. Check your connection and try again.'
+          : cause instanceof Error
+            ? cause.message
+            : 'Unable to create your account.',
+      );
     } finally {
       setLoading(false);
     }
@@ -69,6 +77,8 @@ export default function RegisterScreen() {
         autoCapitalize="words"
         autoComplete="name"
         textContentType="name"
+        maxLength={60}
+        returnKeyType="next"
       />
       <Field
         label="Email"
@@ -80,6 +90,8 @@ export default function RegisterScreen() {
         autoCapitalize="none"
         autoComplete="email"
         textContentType="emailAddress"
+        maxLength={254}
+        returnKeyType="next"
       />
       <Field
         label="Password"
@@ -91,6 +103,8 @@ export default function RegisterScreen() {
         autoCapitalize="none"
         autoComplete="new-password"
         textContentType="newPassword"
+        maxLength={72}
+        returnKeyType="next"
       />
       <Field
         label="Confirm password"
@@ -102,8 +116,14 @@ export default function RegisterScreen() {
         autoCapitalize="none"
         autoComplete="new-password"
         textContentType="newPassword"
-        error={error ?? undefined}
+        maxLength={72}
+        returnKeyType="go"
+        onSubmitEditing={() => {
+          void submit();
+        }}
       />
+
+      {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
 
       <Button label="Create account" onPress={submit} loading={loading} icon="sparkles-outline" />
 
@@ -138,5 +158,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     paddingHorizontal: spacing.md,
+  },
+  error: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.danger,
+    marginTop: -spacing.sm,
   },
 });

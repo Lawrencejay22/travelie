@@ -21,6 +21,7 @@ export function Field({ label, icon, error, secure, style, ...props }: FieldProp
         {icon ? <Ionicons name={icon} size={19} color={focused ? colors.teal : colors.textMuted} /> : null}
         <TextInput
           {...props}
+          accessibilityLabel={props.accessibilityLabel ?? label}
           secureTextEntry={hidden}
           placeholderTextColor={colors.textMuted}
           style={[styles.input, style]}
@@ -34,7 +35,12 @@ export function Field({ label, icon, error, secure, style, ...props }: FieldProp
           }}
         />
         {secure ? (
-          <Pressable onPress={() => setHidden((value) => !value)} hitSlop={10} accessibilityRole="button">
+          <Pressable
+            onPress={() => setHidden((value) => !value)}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={hidden ? 'Show password' : 'Hide password'}
+          >
             <Ionicons name={hidden ? 'eye-outline' : 'eye-off-outline'} size={19} color={colors.textMuted} />
           </Pressable>
         ) : null}
