@@ -50,7 +50,13 @@ Copy-Item .env.example .env
 Default value in `.env`:
 ```env
 VITE_API_URL="http://localhost:4000/api"
+VITE_ANDROID_APK_URL=""
 ```
+
+Set `VITE_ANDROID_APK_URL` to the direct HTTPS download URL for the Android APK
+(for example, the artifact URL from an EAS Android APK build) to enable the
+website's **Install Mobile App** button. Leave it empty until the APK is hosted.
+Set the same variable in the web deployment's environment settings.
 
 ### 3. Run Development Server
 ```bash

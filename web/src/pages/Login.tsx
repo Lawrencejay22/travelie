@@ -110,24 +110,6 @@ export function Login() {
             </button>
           </form>
 
-          <button
-            type="button"
-            className="credential-card"
-            onClick={() => {
-              setEmail('admin@travelie.app');
-              setPassword('Travelie123!');
-              setError(null);
-            }}
-          >
-            <span className="credential-card__icon">
-              <SparkIcon size={16} />
-            </span>
-            <span>
-              <strong>Use the seeded administrator</strong>
-              <span>admin@travelie.app · Travelie123!</span>
-            </span>
-          </button>
-
           <p className="auth__foot">
             Looking for the traveler experience? <Link to="/">Back to Travelie</Link>
           </p>

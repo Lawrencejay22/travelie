@@ -427,6 +427,170 @@ code {
   color: var(--cream);
 }
 
+.landing__install-link {
+  white-space: nowrap;
+}
+
+.app-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 72px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+
+.app-overview__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.app-overview__copy h2,
+.demo__content h2,
+.app-install h2 {
+  color: var(--ink);
+  font-size: clamp(34px, 4vw, 46px);
+}
+
+.app-overview__copy p {
+  max-width: 460px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.app-overview__highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-overview__highlights article {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--cream);
+  color: var(--pine);
+}
+
+.app-overview__highlights h3 {
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 17px;
+}
+
+.app-overview__highlights p {
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.demo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  align-items: center;
+  gap: 56px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 72px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(215, 162, 74, 0.2), transparent 42%),
+    linear-gradient(135deg, var(--pine), var(--ink));
+}
+
+.demo__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.demo__content h2 {
+  color: var(--cream);
+}
+
+.demo__content p {
+  max-width: 470px;
+  color: rgba(252, 250, 245, 0.72);
+  line-height: 1.7;
+}
+
+.demo__placeholder {
+  display: flex;
+  min-height: 230px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid rgba(252, 250, 245, 0.2);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(11, 31, 28, 0.76), rgba(11, 31, 28, 0.42)),
+    url('/welcome.jpg') center / cover;
+  color: var(--cream);
+  text-align: center;
+}
+
+.demo__placeholder-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(252, 250, 245, 0.48);
+  border-radius: 50%;
+  color: var(--gold);
+}
+
+.demo__placeholder strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.demo__placeholder > span:last-child {
+  color: rgba(252, 250, 245, 0.72);
+  font-size: 12px;
+}
+
+.app-install {
+  padding: 82px 24px;
+  background: var(--cream);
+  text-align: center;
+}
+
+.app-install__inner {
+  display: flex;
+  max-width: 620px;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0 auto;
+}
+
+.app-install h2 {
+  font-size: clamp(32px, 4vw, 42px);
+}
+
+.app-install__inner > p {
+  max-width: 500px;
+  line-height: 1.7;
+}
+
+.app-install__status {
+  margin-top: 6px;
+  padding: 9px 15px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--sand);
+  color: var(--pine);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .hero {
   position: relative;
   min-height: 100vh;
@@ -1962,15 +2126,42 @@ code {
   }
 
   .phone {
-    display: none;
+    display: block;
+    margin: 0 auto -110px;
+    transform: scale(0.82);
+    transform-origin: top center;
   }
 
   .landing__nav {
+    flex-wrap: wrap;
     padding: 18px 32px;
   }
 
   .landing__links {
+    order: 3;
+    flex-basis: 100%;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 5px 0 8px;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+
+  .landing__links::-webkit-scrollbar {
     display: none;
+  }
+
+  .app-overview {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .demo {
+    margin-left: 32px;
+    margin-right: 32px;
+    padding: 44px;
   }
 
   .features,
@@ -2071,18 +2262,49 @@ code {
   .hero,
   .features,
   .roadmap,
-  .cta {
+  .cta,
+  .app-overview {
     padding-left: 20px;
     padding-right: 20px;
   }
 
-  .landing__nav .btn {
-    display: none;
+  .landing__nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+    padding-top: 14px;
+    padding-bottom: 12px;
+  }
+
+  .landing__brand {
+    grid-column: 1;
+  }
+
+  .landing__nav .landing__install-link {
+    display: inline-flex;
+    grid-column: 2;
+    grid-row: 1;
+    padding: 9px 12px;
+    font-size: 10.5px;
+  }
+
+  .landing__links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    gap: 17px;
+    width: 100%;
+    padding: 2px 0 5px;
+    font-size: 12px;
   }
 
   .hero {
-    padding-top: 110px;
+    padding-top: 140px;
     padding-bottom: 64px;
+  }
+
+  .phone {
+    margin-bottom: -174px;
+    transform: scale(0.72);
   }
 
   .hero h1 {
@@ -2095,6 +2317,24 @@ code {
 
   .section-heading h2 {
     font-size: 32px;
+  }
+
+  .app-overview {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .demo {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 30px 24px;
+    border-radius: 24px;
+  }
+
+  .demo__placeholder {
+    min-height: 190px;
   }
 
   .band__inner {

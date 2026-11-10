@@ -20,13 +20,19 @@ async function bootstrap() {
   app.useStaticAssets(publicDir, { prefix: '/static/' });
   app.enableCors({
     origin: (origin, callback) => {
-      const allowed = config.getOrThrow<string[]>('corsOrigins');
+      const allowed = [
+        ...config.getOrThrow<string[]>('corsOrigins'),
+        'http://localhost:5173',
+        'http://localhost:8082',
+        'https://travelie-five.vercel.app',
+      ];
       if (!origin || allowed.includes(origin)) {
         callback(null, true);
         return;
       }
       callback(new Error(`Origin ${origin} is not allowed by CORS`), false);
     },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
   app.useGlobalPipes(

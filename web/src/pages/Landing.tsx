@@ -36,24 +36,31 @@ const features = [
   },
 ];
 
+const currentYear = new Date().getFullYear();
+const androidApkUrl = import.meta.env.VITE_ANDROID_APK_URL?.trim();
+const hasAndroidApkUrl = Boolean(androidApkUrl && /^https:\/\//i.test(androidApkUrl));
+
 export function Landing() {
   return (
     <div className="landing">
       <header className="landing__nav">
         <Link to="/" className="landing__brand" aria-label="Travelie home">
-          <Logo light />
+          <Logo light showAdminTag={false} />
         </Link>
         <nav className="landing__links" aria-label="Product">
-          <a href="#discover">Discover</a>
-          <a href="#navigate">Navigate</a>
-          <a href="#roadmap">Roadmap</a>
+          <a href="#home">Home</a>
+          <a href="#about">About</a>
+          <a href="mailto:gabionzalawrencejay@gmail.com">Contact</a>
+          <a href="#demo">Demo Video</a>
+          <a href="#about-app">About the App</a>
+          <a href="#profile">Profile</a>
         </nav>
-        <Link to="/login" className="btn btn--ghost-light btn--sm">
-          Admin dashboard <ArrowIcon size={15} />
-        </Link>
+        <a href="#install" className="btn btn--ghost-light btn--sm landing__install-link">
+          Install Mobile App <ArrowIcon size={15} />
+        </a>
       </header>
 
-      <section className="hero">
+      <section id="home" className="hero">
         <div className="hero__media" aria-hidden="true">
           <img src="/welcome.jpg" alt="" />
           <div className="hero__scrim" />
@@ -76,11 +83,11 @@ export function Landing() {
               real GPS routing and an AR companion that points the way.
             </p>
             <div className="hero__actions">
-              <Link to="/login" className="btn btn--coral">
-                Open the dashboard <ArrowIcon size={16} />
-              </Link>
-              <a href="#roadmap" className="btn btn--outline-light">
-                See the 16-week roadmap
+              <a href="#about-app" className="btn btn--coral">
+                Explore the app <ArrowIcon size={16} />
+              </a>
+              <a href="#demo" className="btn btn--outline-light">
+                See the demo
               </a>
             </div>
             <div className="hero__meta">
@@ -132,7 +139,7 @@ export function Landing() {
         </div>
       </section>
 
-      <section id="discover" className="features">
+      <section id="about" className="features">
         <div className="section-heading">
           <span className="eyebrow">Why Travelie</span>
           <h2>One app from inspiration to arrival.</h2>
@@ -149,6 +156,61 @@ export function Landing() {
               <p>{feature.body}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section id="about-app" className="app-overview">
+        <div className="app-overview__copy">
+          <span className="eyebrow">About the app</span>
+          <h2>One thoughtful companion for the whole trip.</h2>
+          <p>
+            Travelie brings Philippine destinations, practical planning tools and the
+            freedom to explore together in one mobile experience.
+          </p>
+        </div>
+        <div className="app-overview__highlights">
+          <article>
+            <CompassIcon size={20} />
+            <div>
+              <h3>Discover places</h3>
+              <p>Browse destinations, find nearby spots and save the ones you love.</p>
+            </div>
+          </article>
+          <article>
+            <MapIcon size={20} />
+            <div>
+              <h3>Find your way</h3>
+              <p>Explore destination details, maps and route guidance along the way.</p>
+            </div>
+          </article>
+          <article>
+            <CalendarIcon size={20} />
+            <div>
+              <h3>Plan together</h3>
+              <p>Organize trips, keep track of expenses and make room for spontaneity.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="demo" className="demo">
+        <div className="demo__content">
+          <span className="eyebrow eyebrow--light">A first look at Travelie</span>
+          <h2>See where your next journey could take you.</h2>
+          <p>
+            We’re preparing a video walkthrough of the app. In the meantime, explore
+            what Travelie brings to every trip.
+          </p>
+          <a href="#about-app" className="btn btn--outline-light">
+            About the app <ArrowIcon size={16} />
+          </a>
+        </div>
+        <div className="demo__placeholder" role="status">
+          <span className="demo__placeholder-mark">
+            <CompassIcon size={26} />
+          </span>
+          <strong>Travelie app walkthrough</strong>
+          <span>Demo video coming soon</span>
         </div>
       </section>
 
@@ -193,27 +255,58 @@ export function Landing() {
         </ol>
       </section>
 
-      <section id="navigate" className="cta">
+      <section id="profile" className="cta">
         <div className="cta__inner">
           <div>
-            <span className="eyebrow eyebrow--light">Ready when you are</span>
-            <h2>Step into the Travelie console.</h2>
-            <p>Manage destinations, watch traveler activity and steer the next milestone.</p>
+            <span className="eyebrow eyebrow--light">Your travel life, in one place</span>
+            <h2>Make Travelie yours.</h2>
+            <p>
+              Create your traveler profile in the mobile app to keep your saved
+              destinations and trip plans close at hand.
+            </p>
           </div>
-          <Link to="/login" className="btn btn--coral">
-            Sign in to admin <ArrowIcon size={16} />
-          </Link>
+          <a href="#install" className="btn btn--coral">
+            Get the mobile app <ArrowIcon size={16} />
+          </a>
+        </div>
+      </section>
+
+      <section id="install" className="app-install">
+        <div className="app-install__inner">
+          <span className="eyebrow">Take Travelie with you</span>
+          <h2>Your next journey starts here.</h2>
+          {hasAndroidApkUrl ? (
+            <>
+              <p>Download Travelie for Android and take your trip plans with you.</p>
+              <a
+                href={androidApkUrl}
+                className="btn btn--coral"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Download Android app <ArrowIcon size={16} />
+              </a>
+            </>
+          ) : (
+            <>
+              <p>
+                Travelie for Android is ready to share. The APK download link will
+                appear here once it is configured.
+              </p>
+              <span className="app-install__status">Android download link coming soon</span>
+            </>
+          )}
         </div>
       </section>
 
       <footer className="landing__footer">
         <div className="landing__footer-inner">
-          <Logo light />
+          <Logo light showAdminTag={false} />
           <span>Discover. Navigate. Experience.</span>
           <div className="landing__footer-links">
-            <Link to="/login">Admin</Link>
-            <a href="#roadmap">Roadmap</a>
-            <span>© {new Date().getFullYear()} Travelie</span>
+            <a href="#home">Home</a>
+            <a href="mailto:gabionzalawrencejay@gmail.com">Contact</a>
+            <span>© {currentYear} Travelie</span>
           </div>
         </div>
       </footer>
